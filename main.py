@@ -3,6 +3,12 @@ import os
 from dotenv import load_dotenv
 import pandas as pd
 
+import elevenlabs
+
+def create_ai_voice_file(audio, file_name):
+    elevenlabs.save(audio, file_name)
+    pass
+
 
 def main():
     load_dotenv()
@@ -15,9 +21,19 @@ def main():
         post_list.append([post.title, post.score, post.url, post.num_comments, post.selftext])
 
     post_df = pd.DataFrame(post_list, columns=['title', 'score', 'url', 'num_comments', 'body'])
-    print(post_df.head())
 
     # Now we need to create ai voice with this
+    test = f"{post_df['body'][2].split(".")[0]}.{post_df['body'][2].split(".")[1]}.{post_df['body'][2].split(".")[2]}."
+    print(len(bruh))
+
+    audio = elevenlabs.generate(
+        text=test,
+        voice="Ethan",
+        api_key=os.environ['ELEVEN_LABS_KEY']
+    )
+
+    elevenlabs.save(audio, "audio.mp3")
+
     pass
 
 
