@@ -24,7 +24,6 @@ def main():
 
     # Now we need to create ai voice with this
     test = f"{post_df['body'][2].split(".")[0]}.{post_df['body'][2].split(".")[1]}.{post_df['body'][2].split(".")[2]}."
-    print(len(bruh))
 
     audio = elevenlabs.generate(
         text=test,
