@@ -5,6 +5,7 @@ import pandas as pd  # pandas Dataframe
 import elevenlabs  # AI voice
 from pydub import AudioSegment  # combining mp3
 
+
 def separate_post_body(post_body: str) -> list:
     ret = []
     seperated_post = post_body.split('.')
@@ -47,31 +48,43 @@ def main():
     # basically the same as the list but makes it easier if we want to record the analytics of the posts
     post_df = pd.DataFrame(post_list, columns=['title', 'score', 'url', 'num_comments', 'body'])
 
-    #for post in post_dict:
-    #    if len(post_dict[post]) == 1:
-    #        audio = elevenlabs.generate(
-    #            text=post_dict[post][0],
-    #            voice="Adam",
-    #            api_key=os.environ['ELEVEN_LABS_KEY']
-    #        )
-    #
-    #        elevenlabs.save(audio, f"audio/{post}.mp3")
+    # saving body audio
+    for post in post_dict:
+        # creates audio directories if they do not exist
+        if not os.path.isdir("temp"):
+            os.mkdir("temp")
+        if not os.path.isdir("audio"):
+            os.mkdir("audio")
 
-    #sound1 = AudioSegment.from_mp3("test.mp3")
-    #sound2 = AudioSegment.from_mp3("audio.mp3")
+        # list of the separated segments of the body text
+        body_lst = post_dict[post]
 
-    #combined = sound1 + sound2
-    #combined.export("combined.mp3", format="mp3")
-    # Now we need to create ai voice with this
+        # creates first audio segment
+        ai_audio_seg = elevenlabs.generate(
+            text=body_lst[0],
+            voice="Adam",
+            api_key=os.environ['ELEVEN_LABS_KEY']
+        )
+        elevenlabs.save(ai_audio_seg, f"temp/audio0.mp3")
 
-    #audio = elevenlabs.generate(
-    #    text=ret[0],
-    #    voice="Adam",
-    #    api_key=os.environ['ELEVEN_LABS_KEY']
-    #)
+        # creates combined mp3 object
+        combined = AudioSegment.from_mp3("temp/audio0.mp3")
 
-    #elevenlabs.save(audio, "test.mp3")
+        # checks if more segments need to be made
+        if len(body_lst) > 1:
+            for i, seg in enumerate(body_lst[1:]):
+                # saves next audio segments
+                ai_audio_seg = elevenlabs.generate(
+                   text=seg,
+                   voice="Adam",
+                   api_key=os.environ['ELEVEN_LABS_KEY']
+                )
+                elevenlabs.save(ai_audio_seg, f"temp/audio{i + 1}.mp3")
 
+                # combines new segment with combined mp3 object
+                combined += AudioSegment.from_mp3(f"temp/audio{i + 1}.mp3")
+
+        combined.export(f"audio/{post}.mp3", format="mp3")
     pass
 
 
