@@ -8,7 +8,8 @@ from pydub import AudioSegment  # combining mp3
 
 def prep_post_body(post_body: str, post_title: str) -> list:
     ret = []
-    seperated_post = post_title.split(' ').extend(post_body.split(' '))
+    post = f"{post_title} {post_body}"
+    seperated_post = post.split(' ')
     word_blacklist = {
         "AITA": "am i the a hole?",
         "AITA.": "am i the a hole?",
