@@ -6,13 +6,21 @@ import elevenlabs  # AI voice
 from pydub import AudioSegment  # combining mp3
 
 
-def separate_post_body(post_body: str) -> list:
+def prep_post_body(post_body: str, post_title: str) -> list:
     ret = []
-    seperated_post = post_body.split('.')
+    seperated_post = post_title.split(' ').extend(post_body.split(' '))
+    word_blacklist = {
+        "AITA": "am i the a hole?",
+        "AITA.": "am i the a hole?",
+        "AITA?": "am i the a hole?",
+        "fuck": "frick",
+    }
 
     curr_portion = ""
-    for sentence in seperated_post:
-        temp = f"{sentence}. "
+    for word in seperated_post:
+        if word in word_blacklist.keys():
+            word = word_blacklist[word]
+        temp = f"{word} "
 
         if len(curr_portion + temp) > 2500:
             ret.append(curr_portion[:len(curr_portion) - 1])
@@ -35,14 +43,14 @@ def main():
 
     # save posts to data structures
     post_list = []  # for holding all info about the posts
-    post_dict = {}  # for holding the data we need to make the tik toks
+    post_dict = {}  # for holding the data we need to make the tiktoks
 
     # initializes the list and dict
     for i, post in enumerate(subreddit):
-        if i == 0:
+        if post.stickied:  # skips pinned posts
             continue
         post_list.append([post.title, post.score, post.url, post.num_comments, post.selftext])
-        post_dict[post.title] = separate_post_body(post.selftext)
+        post_dict[post.title] = prep_post_body(post.selftext, post.title)
 
     # initializes the DataFrame
     # basically the same as the list but makes it easier if we want to record the analytics of the posts
